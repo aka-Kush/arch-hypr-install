@@ -53,6 +53,15 @@ mount "${EFI}" /mnt/boot/efi
 swapon "${SWAP}"
 
 echo -e "\n==================================="
+echo "Optimizing Mirrorlist"
+echo "==================================="
+# Backup existing mirrorlist
+cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+
+# Use reflector to get best Indian mirrors
+reflector -c IN -p https -n 10 --sort rate --download-timeout 2500 --save /etc/pacman.d/mirrorlist
+
+echo -e "\n==================================="
 echo "Installing Base Arch Linux"
 echo "==================================="
 sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 5/' /etc/pacman.conf
