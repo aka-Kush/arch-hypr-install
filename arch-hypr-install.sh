@@ -115,7 +115,7 @@ echo "==================================="
 echo "Installing Video and Audio Drivers"
 echo "==================================="
 # NVIDIA drivers
-pacman -S mesa nvidia nvidia-utils nvidia-settings opencl-nvidia --noconfirm --needed
+pacman -S mesa nvidia-open-dkms nvidia-utils nvidia-settings opencl-nvidia --noconfirm --needed
 
 # Audio (PipeWire)
 pacman -S pipewire pipewire-alsa pipewire-pulse pipewire-jack \
