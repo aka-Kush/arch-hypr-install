@@ -7,7 +7,9 @@ echo "Arch Linux + Hyprland Install Script"
 echo "==================================="
 
 # Gather information
-echo -e "\nPlease enter EFI partition (e.g., /dev/nvme0n1p1):"
+echo -e "\nPlease enter the main disk (e.g., /dev/nvme0n1 or /dev/vda):"
+read -r DISK
+echo "Please enter EFI partition (e.g., /dev/nvme0n1p1):"
 read -r EFI
 echo "Please enter Root(/) partition (e.g., /dev/nvme0n1p2):"
 read -r ROOT  
@@ -24,6 +26,7 @@ echo ""
 # Confirm partitions
 echo -e "\n==================================="
 echo "Please verify your selections:"
+echo "DISK: ${DISK}"
 echo "EFI: ${EFI}"
 echo "ROOT: ${ROOT}"
 echo "SWAP: ${SWAP}"
@@ -68,6 +71,7 @@ cat <<'REALEND' > /mnt/next.sh
 USER="$1"
 NAME="$2"
 PASSWORD="$3"
+DISK="$4"
 
 # Create user
 useradd -m -G wheel,storage,power,audio,video,input "$USER"
@@ -106,9 +110,8 @@ sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 5/' /etc/pacman.conf
 
 pacman -S grub efibootmgr ntfs-3g os-prober fuse3 --noconfirm --needed
 
-# Detect boot disk from EFI partition
-DISK=$(lsblk -no PKNAME /boot/efi | head -n 1)
-grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
+# Install GRUB to the main disk
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck "${DISK}"
 grub-mkconfig -o /boot/grub/grub.cfg
 
 echo "==================================="
@@ -155,8 +158,8 @@ REALEND
 
 chmod +x /mnt/next.sh
 
-# Execute chroot script
-arch-chroot /mnt /next.sh "$USER" "$NAME" "$PASSWORD"
+# Execute chroot script - pass DISK as 4th argument
+arch-chroot /mnt /next.sh "$USER" "$NAME" "$PASSWORD" "$DISK"
 
 # Cleanup
 rm /mnt/next.sh
